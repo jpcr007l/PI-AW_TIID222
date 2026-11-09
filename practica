@@ -1,0 +1,139 @@
+Javier
+
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+
+const ACTIVIDADES = [
+  { id: '1', nombre: 'Práctica No. 7 - Props' },
+  { id: '2', nombre: 'Práctica No. 8 - StyleSheet' },
+  { id: '3', nombre: 'Reporte Grid y Flex' },
+  { id: '4', nombre: 'Práctica CRUD en PHP' },
+  { id: '5', nombre: 'Arreglos bidimensionales' },
+  { id: '6', nombre: 'Presentación modelo de cascada' },
+];
+
+export default function App() {
+  return (
+    <SafeAreaView style={styles.contenedor}>
+      <FlatList
+        data={ACTIVIDADES}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.tarjeta}>
+            <Text style={styles.nombre}>{item.nombre}</Text>
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  contenedor: { flex: 1, padding: 16, backgroundColor: '#F4F6F8' },
+  tarjeta: { backgroundColor: '#FFF', padding: 16, borderRadius: 8, marginBottom: 10 },
+  nombre: { fontSize: 16 },
+});
+
+Haziel
+
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+
+const ACTIVIDADES = [
+  { id: '1', nombre: 'Práctica No. 7 - Props' },
+  { id: '2', nombre: 'Práctica No. 8 - StyleSheet' },
+  { id: '3', nombre: 'Reporte Grid y Flex' },
+  { id: '4', nombre: 'Práctica CRUD en PHP' },
+  { id: '5', nombre: 'Arreglos bidimensionales' },
+  { id: '6', nombre: 'Presentación modelo de cascada' },
+];
+
+export default function App() {
+  const [completadas, setCompletadas] = useState([]);
+
+  const alternar = (id) => {
+    setCompletadas((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.contenedor}>
+      <FlatList
+        data={ACTIVIDADES}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const hecha = completadas.includes(item.id);
+          return (
+            <TouchableOpacity style={styles.tarjeta} onPress={() => alternar(item.id)}>
+              <Text style={hecha ? styles.tachado : styles.nombre}>{item.nombre}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  contenedor: { flex: 1, padding: 16, backgroundColor: '#F4F6F8' },
+  tarjeta: { backgroundColor: '#FFF', padding: 16, borderRadius: 8, marginBottom: 10 },
+  nombre: { fontSize: 16 },
+  tachado: { fontSize: 16, textDecorationLine: 'line-through', color: '#6B7280' },
+});
+
+Chuy
+
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+
+const ACTIVIDADES = [
+  { id: '1', nombre: 'Práctica No. 7 - Props' },
+  { id: '2', nombre: 'Práctica No. 8 - StyleSheet' },
+  { id: '3', nombre: 'Reporte Grid y Flex' },
+  { id: '4', nombre: 'Práctica CRUD en PHP' },
+  { id: '5', nombre: 'Arreglos bidimensionales' },
+  { id: '6', nombre: 'Presentación modelo de cascada' },
+];
+
+export default function App() {
+  const [completadas, setCompletadas] = useState([]);
+
+  const alternar = (id) => {
+    setCompletadas((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const total = ACTIVIDADES.length;
+  const hechas = completadas.length;
+
+  return (
+    <SafeAreaView style={styles.contenedor}>
+      <Text style={styles.titulo}>
+        Progreso: {hechas} de {total} ({Math.round((hechas / total) * 100)}%)
+      </Text>
+
+      <FlatList
+        data={ACTIVIDADES}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const hecha = completadas.includes(item.id);
+          return (
+            <TouchableOpacity style={styles.tarjeta} onPress={() => alternar(item.id)}>
+              <Text style={hecha ? styles.tachado : styles.nombre}>{item.nombre}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  contenedor: { flex: 1, padding: 16, backgroundColor: '#F4F6F8' },
+  titulo: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  tarjeta: { backgroundColor: '#FFF', padding: 16, borderRadius: 8, marginBottom: 10 },
+  nombre: { fontSize: 16 },
+  tachado: { fontSize: 16, textDecorationLine: 'line-through', color: '#6B7280' },
+});
