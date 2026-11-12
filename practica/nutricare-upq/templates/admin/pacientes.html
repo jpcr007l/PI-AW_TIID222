@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Directorio de Pacientes{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Directorio General de Pacientes</h1>
+            <p class="text-sm text-slate-500">Expedientes registrados y perfiles clínicos en la clínica.</p>
+        </div>
+        <div class="badge badge-lg badge-outline text-slate-600 font-semibold">
+            {{ pacientes|length }} Pacientes Registrados
+        </div>
+    </div>
+
+    <!-- Tabla de Pacientes -->
+    <div class="card bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div class="card-body p-6">
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Paciente</th>
+                            <th>Sexo</th>
+                            <th>Estatura</th>
+                            <th>Alergias / Restricciones</th>
+                            <th>Objetivo de Salud</th>
+                            <th>Contacto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacientes %}
+                        <tr class="hover">
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder">
+                                        <div class="bg-teal-100 text-teal-700 rounded-full w-9">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-800">{{ p.nombre }} {{ p.apellido }}</div>
+                                        <div class="text-xs text-slate-400">Registrado: {{ p.fecha_registro[:10] }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-ghost badge-sm">{{ p.sexo or 'No definido' }}</span></td>
+                            <td class="font-medium">{{ p.estatura_cm }} cm</td>
+                            <td><span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded-md">{{ p.alergias or 'Ninguna' }}</span></td>
+                            <td class="text-xs text-slate-600 max-w-xs truncate">{{ p.objetivo_salud or 'General' }}</td>
+                            <td>
+                                <div class="text-xs font-medium text-slate-700">{{ p.email }}</div>
+                                <div class="text-xs text-slate-400">{{ p.telefono or 'Sin tel.' }}</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

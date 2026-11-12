@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Gestión de Especialistas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Especialistas en Nutrición</h1>
+            <p class="text-sm text-slate-500">Alta, consulta y administración de credenciales de nutriólogos.</p>
+        </div>
+        <button onclick="document.getElementById('modal_nuevo_nutriologo').showModal()" class="btn btn-primary btn-sm text-white shadow-sm">
+            <i class="fa-solid fa-user-plus mr-1"></i> Registrar Nuevo Especialista
+        </button>
+    </div>
+
+    <!-- Tabla de Nutriólogos -->
+    <div class="card bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div class="card-body p-6">
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Especialista</th>
+                            <th>Cédula</th>
+                            <th>Especialidad</th>
+                            <th>Horario de Atención</th>
+                            <th>Contacto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for n in nutriologos %}
+                        <tr class="hover">
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder">
+                                        <div class="bg-emerald-100 text-emerald-700 rounded-full w-9">
+                                            <i class="fa-solid fa-user-doctor"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-800">{{ n.nombre }} {{ n.apellido }}</div>
+                                        <div class="text-xs text-slate-400">{{ n.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-ghost font-mono text-xs">{{ n.cedula_profesional }}</span></td>
+                            <td class="font-medium text-slate-700">{{ n.especialidad }}</td>
+                            <td><i class="fa-regular fa-clock text-slate-400 mr-1"></i> {{ n.horario_inicio }} - {{ n.horario_fin }}</td>
+                            <td>{{ n.telefono or 'No registrado' }}</td>
+                            <td>
+                                {% if n.activo %}
+                                    <span class="badge badge-success text-white badge-sm">Activo</span>
+                                {% else %}
+                                    <span class="badge badge-neutral badge-sm">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_toggle_nutriologo', id_usuario=n.id_usuario) }}" 
+                                   class="btn btn-xs {% if n.activo %}btn-outline btn-error{% else %}btn-outline btn-success{% endif %}">
+                                    {% if n.activo %}
+                                        <i class="fa-solid fa-user-slash mr-1"></i> Desactivar
+                                    {% else %}
+                                        <i class="fa-solid fa-user-check mr-1"></i> Activar
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Registrar Nuevo Nutriólogo -->
+<dialog id="modal_nuevo_nutriologo" class="modal">
+    <div class="modal-box max-w-lg bg-white">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-user-doctor text-emerald-500"></i> Registrar Especialista
+        </h3>
+
+        <form action="{{ url_for('admin_crear_nutriologo') }}" method="POST" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Nombre</span></label>
+                    <input type="text" name="nombre" required placeholder="Ej. Mariana" class="input input-bordered input-sm w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Apellido</span></label>
+                    <input type="text" name="apellido" required placeholder="Ej. Morales" class="input input-bordered input-sm w-full" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Cédula Profesional</span></label>
+                    <input type="text" name="cedula" required placeholder="Ej. CED-83921" class="input input-bordered input-sm w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Teléfono</span></label>
+                    <input type="tel" name="telefono" placeholder="Ej. 4421234567" class="input input-bordered input-sm w-full" />
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label py-1"><span class="label-text text-xs font-semibold">Especialidad</span></label>
+                <input type="text" name="especialidad" required placeholder="Ej. Nutrición Deportiva y Obesidad" class="input input-bordered input-sm w-full" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Horario Inicio</span></label>
+                    <input type="time" name="horario_inicio" value="08:00" class="input input-bordered input-sm w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Horario Fin</span></label>
+                    <input type="time" name="horario_fin" value="18:00" class="input input-bordered input-sm w-full" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Correo Electrónico</span></label>
+                    <input type="email" name="email" required placeholder="nutriologo@nutricare.upq.edu.mx" class="input input-bordered input-sm w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Contraseña Inicial</span></label>
+                    <input type="password" name="password" required placeholder="••••••••" class="input input-bordered input-sm w-full" />
+                </div>
+            </div>
+
+            <div class="modal-action pt-2">
+                <button type="submit" class="btn btn-primary btn-sm text-white w-full">Guardar y Habilitar Acceso</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+{% endblock %}

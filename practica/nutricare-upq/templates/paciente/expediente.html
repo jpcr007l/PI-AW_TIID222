@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Mi Progreso Antropométrico - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Mi Evolución y Medidas Antropométricas</h1>
+            <p class="text-sm text-slate-500">Monitoreo gráfico de peso corporal, porcentaje de grasa y masa magra.</p>
+        </div>
+        <div class="badge badge-emerald badge-lg text-emerald-800 font-semibold bg-emerald-100">
+            Estatura Base: {{ paciente.estatura_cm }} cm
+        </div>
+    </div>
+
+    <!-- Gráfica de Evolución -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6">
+            <h2 class="card-title text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-emerald-500"></i> Gráfica Histórica de Composición Corporal
+            </h2>
+            <div class="w-full h-72">
+                <canvas id="evolucionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Detallada de Consultas -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6">
+            <h3 class="font-bold text-base text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-teal-500"></i> Registro Cronológico de Evaluaciones
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Fecha</th>
+                            <th>Peso (kg)</th>
+                            <th>IMC</th>
+                            <th>% Grasa</th>
+                            <th>Masa Magra (kg)</th>
+                            <th>Cintura / Cadera</th>
+                            <th>Nutriólogo(a)</th>
+                            <th>Comentarios Clínicos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in evaluaciones %}
+                        <tr class="hover">
+                            <td class="font-bold text-slate-800">{{ e.fecha_evaluacion }}</td>
+                            <td class="font-extrabold text-emerald-600">{{ e.peso_kg }} kg</td>
+                            <td>
+                                <span class="badge {% if e.imc < 25 %}badge-success text-white{% elif e.imc < 30 %}badge-warning{% else %}badge-error text-white{% endif %} badge-sm font-semibold">
+                                    {{ e.imc }}
+                                </span>
+                            </td>
+                            <td>{{ e.porcentaje_grasa or '-' }} %</td>
+                            <td>{{ e.masa_muscular_kg or '-' }} kg</td>
+                            <td>{{ e.circunferencia_cintura or '-' }} cm / {{ e.circunferencia_cadera or '-' }} cm</td>
+                            <td class="text-xs">{{ e.nutriologo }}</td>
+                            <td class="text-xs text-slate-500 max-w-xs">{{ e.diagnostico_notas }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-6 text-slate-400">No hay evaluaciones registradas aún.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const fechas = {{ fechas | tojson }};
+const pesos = {{ pesos | tojson }};
+const grasas = {{ grasas | tojson }};
+const musculos = {{ musculos | tojson }};
+
+if (fechas.length > 0) {
+    const ctx = document.getElementById('evolucionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: fechas,
+            datasets: [
+                {
+                    label: 'Peso (kg)',
+                    data: pesos,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 5
+                },
+                {
+                    label: '% Grasa Corporal',
+                    data: grasas,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointRadius: 4
+                },
+                {
+                    label: 'Masa Muscular (kg)',
+                    data: musculos,
+                    borderColor: '#06b6d4',
+                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: false }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

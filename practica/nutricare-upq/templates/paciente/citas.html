@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Mis Citas - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Mis Citas Médicas</h1>
+            <p class="text-sm text-slate-500">Agenda nuevas consultas presenciales con tu nutriólogo(a) o revisa tus citas anteriores.</p>
+        </div>
+        <button onclick="document.getElementById('modal_solicitar_cita').showModal()" class="btn btn-primary btn-sm text-white shadow-sm">
+            <i class="fa-solid fa-calendar-plus mr-1"></i> Solicitar Nueva Cita
+        </button>
+    </div>
+
+    <!-- Tabla de Citas del Paciente -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6">
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Fecha & Hora</th>
+                            <th>Especialista</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in mis_citas %}
+                        <tr class="hover">
+                            <td class="font-bold text-slate-800">
+                                <i class="fa-regular fa-calendar text-emerald-500 mr-1"></i> {{ c.fecha_cita }}
+                                <span class="badge badge-ghost badge-sm ml-1">{{ c.hora_cita }} hrs</span>
+                            </td>
+                            <td>
+                                <div class="font-bold text-slate-700">{{ c.nutriologo }}</div>
+                                <div class="text-xs text-slate-400">{{ c.especialidad }}</div>
+                            </td>
+                            <td class="text-xs text-slate-600">{{ c.motivo }}</td>
+                            <td>
+                                {% if c.estado == 'Confirmada' %}
+                                    <span class="badge badge-success text-white badge-sm">Confirmada</span>
+                                {% elif c.estado == 'Pendiente' %}
+                                    <span class="badge badge-warning badge-sm">Pendiente por confirmar</span>
+                                {% elif c.estado == 'Completada' %}
+                                    <span class="badge badge-info text-white badge-sm">Completada</span>
+                                {% else %}
+                                    <span class="badge badge-error text-white badge-sm">Cancelada</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if c.estado in ['Pendiente', 'Confirmada'] %}
+                                    <a href="{{ url_for('paciente_cancelar_cita', id_cita=c.id_cita) }}" 
+                                       onclick="return confirm('¿Deseas cancelar esta cita agendada?');"
+                                       class="btn btn-xs btn-outline btn-error">
+                                        <i class="fa-solid fa-ban mr-1"></i> Cancelar
+                                    </a>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-slate-400">No tienes citas registradas. ¡Solicita tu primera cita arriba!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Solicitar Cita -->
+<dialog id="modal_solicitar_cita" class="modal">
+    <div class="modal-box max-w-md bg-white">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-emerald-500"></i> Agendar Cita Nutricional
+        </h3>
+
+        <form action="{{ url_for('paciente_citas') }}" method="POST" class="space-y-4">
+            <div class="form-control">
+                <label class="label py-1"><span class="label-text text-xs font-semibold">Selecciona a tu Nutriólogo(a)</span></label>
+                <select name="id_nutriologo" required class="select select-bordered select-sm w-full">
+                    {% for n in nutriologos %}
+                        <option value="{{ n.id_nutriologo }}">{{ n.nombre_completo }} ({{ n.especialidad }}) [{{ n.horario_inicio }}-{{ n.horario_fin }}]</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Fecha Deseada</span></label>
+                    <input type="date" name="fecha_cita" id="fecha_cita_input" required class="input input-bordered input-sm w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-xs font-semibold">Hora de Cita</span></label>
+                    <select name="hora_cita" required class="select select-bordered select-sm w-full">
+                        <option value="08:00">08:00 hrs</option>
+                        <option value="09:00">09:00 hrs</option>
+                        <option value="10:00">10:00 hrs</option>
+                        <option value="11:00">11:00 hrs</option>
+                        <option value="12:00">12:00 hrs</option>
+                        <option value="13:00">13:00 hrs</option>
+                        <option value="16:00">16:00 hrs</option>
+                        <option value="17:00">17:00 hrs</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label py-1"><span class="label-text text-xs font-semibold">Motivo de Consulta</span></label>
+                <textarea name="motivo" rows="2" required placeholder="Ej. Control quincenal, ajuste de alimentos o dudas con porciones..." class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
+            </div>
+
+            <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+                <i class="fa-solid fa-circle-info mr-1"></i> El sistema validará que el horario seleccionado se encuentre libre para el médico.
+            </div>
+
+            <div class="modal-action pt-2">
+                <button type="submit" class="btn btn-primary btn-sm text-white w-full">Confirmar Solicitud de Cita</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+// Evitar fechas pasadas
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('fecha_cita_input').min = today;
+document.getElementById('fecha_cita_input').value = today;
+</script>
+{% endblock %}

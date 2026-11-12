@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Pacientes en Control - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Control de Pacientes</h1>
+            <p class="text-sm text-slate-500">Accede a las valoraciones antropométricas, prescripción de menús y expedientes.</p>
+        </div>
+    </div>
+
+    <div class="card bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div class="card-body p-6">
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Paciente</th>
+                            <th>Objetivo</th>
+                            <th>Estatura</th>
+                            <th>Último Peso</th>
+                            <th>Último IMC</th>
+                            <th>Acciones Clínicas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacientes %}
+                        <tr class="hover">
+                            <td>
+                                <div class="font-bold text-slate-800">{{ p.nombre }} {{ p.apellido }}</div>
+                                <div class="text-xs text-slate-400">{{ p.email }}</div>
+                            </td>
+                            <td><span class="text-xs text-slate-600">{{ p.objetivo_salud or 'General' }}</span></td>
+                            <td>{{ p.estatura_cm }} cm</td>
+                            <td>
+                                {% if p.ultimo_peso %}
+                                    <span class="font-bold text-slate-800">{{ p.ultimo_peso }} kg</span>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">Sin registro</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if p.ultimo_imc %}
+                                    <span class="badge {% if p.ultimo_imc < 25 %}badge-success text-white{% elif p.ultimo_imc < 30 %}badge-warning{% else %}badge-error text-white{% endif %} badge-sm">
+                                        {{ p.ultimo_imc }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ url_for('medico_consulta', id_paciente=p.id_paciente) }}" 
+                                       class="btn btn-xs btn-primary text-white" title="Nueva Medición Antropométrica">
+                                        <i class="fa-solid fa-weight-scale mr-1"></i> Medir
+                                    </a>
+                                    <a href="{{ url_for('medico_crear_plan', id_paciente=p.id_paciente) }}" 
+                                       class="btn btn-xs btn-outline btn-success" title="Prescribir Dieta">
+                                        <i class="fa-solid fa-utensils mr-1"></i> Asignar Menú
+                                    </a>
+                                    <a href="{{ url_for('medico_historial_paciente', id_paciente=p.id_paciente) }}" 
+                                       class="btn btn-xs btn-outline btn-neutral" title="Historial Clínico">
+                                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

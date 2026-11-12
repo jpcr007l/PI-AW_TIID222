@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Mi Plan de Alimentación - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Mi Plan Nutricional Activo</h1>
+            <p class="text-sm text-slate-500">Sigue tus porciones y recomendaciones diarias indicadas por tu especialista.</p>
+        </div>
+        {% if plan %}
+        <div class="badge badge-warning badge-lg font-bold gap-1 text-slate-800">
+            <i class="fa-solid fa-fire text-amber-600"></i> {{ plan.calorias_totales }} kcal / día
+        </div>
+        {% endif %}
+    </div>
+
+    {% if plan %}
+        <!-- Encabezado del Plan -->
+        <div class="card bg-emerald-50 border border-emerald-200 p-6 rounded-2xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <span class="badge badge-success text-white badge-sm mb-1 font-semibold">PLAN ACTIVO</span>
+                    <h2 class="text-xl font-bold text-emerald-950">{{ plan.titulo_plan }}</h2>
+                    <p class="text-xs text-emerald-800 mt-1">
+                        Prescrito por <strong>{{ plan.nutriologo }}</strong> ({{ plan.especialidad }})
+                    </p>
+                </div>
+                <div class="text-xs text-emerald-900 bg-white/70 px-3 py-2 rounded-xl border border-emerald-200">
+                    <i class="fa-regular fa-calendar-check mr-1"></i> Vigencia desde: <strong>{{ plan.fecha_inicio }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tiempos de Comida -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for c in comidas %}
+            <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl hover:shadow-md transition">
+                <div class="card-body p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                            {{ loop.index }}
+                        </span>
+                        <h3 class="font-bold text-slate-800 text-sm">{{ c.momento }}</h3>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-medium">
+                        {{ c.descripcion_alimentos }}
+                    </div>
+
+                    {% if c.recomendaciones %}
+                    <div class="mt-2 text-xs text-emerald-700 flex items-start gap-1.5 bg-emerald-50/50 p-2 rounded-lg">
+                        <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5"></i>
+                        <span>{{ c.recomendaciones }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl p-12 text-center text-slate-400">
+            <i class="fa-solid fa-bowl-food text-4xl mb-3 text-slate-300"></i>
+            <h3 class="font-bold text-lg text-slate-700">Aún no cuentas con un plan prescrito</h3>
+            <p class="text-xs text-slate-500 mt-1">Tu nutriólogo te asignará un menú personalizado en tu siguiente consulta.</p>
+            <div class="mt-4">
+                <a href="{{ url_for('paciente_citas') }}" class="btn btn-primary btn-sm text-white">Agendar Cita</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

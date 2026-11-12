@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Agenda de Citas - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Agenda de Citas Nutricionales</h1>
+            <p class="text-sm text-slate-500">Confirma, completa o gestiona las consultas solicitadas por tus pacientes.</p>
+        </div>
+    </div>
+
+    <div class="card bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div class="card-body p-6">
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Fecha & Hora</th>
+                            <th>Paciente</th>
+                            <th>Motivo de Consulta</th>
+                            <th>Contacto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in citas %}
+                        <tr class="hover">
+                            <td class="font-medium">
+                                <i class="fa-regular fa-calendar text-emerald-500 mr-1"></i> {{ c.fecha_cita }}
+                                <div class="font-bold text-slate-800 text-xs">{{ c.hora_cita }} hrs</div>
+                            </td>
+                            <td>
+                                <div class="font-bold text-slate-800">{{ c.paciente }}</div>
+                                <a href="{{ url_for('medico_historial_paciente', id_paciente=c.id_paciente) }}" class="text-xs text-emerald-600 hover:underline">
+                                    <i class="fa-solid fa-chart-line mr-1"></i> Ver expediente
+                                </a>
+                            </td>
+                            <td class="text-xs text-slate-600 max-w-xs">{{ c.motivo }}</td>
+                            <td>
+                                <div class="text-xs">{{ c.telefono or 'Sin tel.' }}</div>
+                                <div class="text-xs text-slate-400">{{ c.email }}</div>
+                            </td>
+                            <td>
+                                {% if c.estado == 'Confirmada' %}
+                                    <span class="badge badge-success text-white badge-sm">Confirmada</span>
+                                {% elif c.estado == 'Pendiente' %}
+                                    <span class="badge badge-warning badge-sm">Pendiente</span>
+                                {% elif c.estado == 'Completada' %}
+                                    <span class="badge badge-info text-white badge-sm">Completada</span>
+                                {% else %}
+                                    <span class="badge badge-error text-white badge-sm">Cancelada</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-1">
+                                    {% if c.estado == 'Pendiente' %}
+                                        <a href="{{ url_for('medico_cambiar_estado_cita', id_cita=c.id_cita, nuevo_estado='Confirmada') }}" 
+                                           class="btn btn-xs btn-success text-white" title="Confirmar Cita">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    {% if c.estado in ['Pendiente', 'Confirmada'] %}
+                                        <a href="{{ url_for('medico_consulta', id_paciente=c.id_paciente) }}" 
+                                           class="btn btn-xs btn-primary text-white" title="Atender Consulta">
+                                            <i class="fa-solid fa-stethoscope"></i>
+                                        </a>
+                                        <a href="{{ url_for('medico_cambiar_estado_cita', id_cita=c.id_cita, nuevo_estado='Completada') }}" 
+                                           class="btn btn-xs btn-outline btn-info" title="Marcar como Completada">
+                                            <i class="fa-solid fa-flag-checkered"></i>
+                                        </a>
+                                        <a href="{{ url_for('medico_cambiar_estado_cita', id_cita=c.id_cita, nuevo_estado='Cancelada') }}" 
+                                           onclick="return confirm('¿Seguro que deseas cancelar esta cita?');"
+                                           class="btn btn-xs btn-outline btn-error" title="Cancelar Cita">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-slate-400">No hay citas registradas en tu agenda.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

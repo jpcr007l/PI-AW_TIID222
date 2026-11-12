@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Expediente del Paciente - NutriCare{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('medico_pacientes') }}" class="btn btn-ghost btn-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Volver a mis pacientes
+        </a>
+        <div class="flex gap-2">
+            <a href="{{ url_for('medico_consulta', id_paciente=paciente.id_paciente) }}" class="btn btn-primary btn-sm text-white">
+                <i class="fa-solid fa-plus mr-1"></i> Nueva Evaluación
+            </a>
+            <a href="{{ url_for('medico_crear_plan', id_paciente=paciente.id_paciente) }}" class="btn btn-outline btn-success btn-sm">
+                <i class="fa-solid fa-utensils mr-1"></i> Nuevo Menú
+            </a>
+        </div>
+    </div>
+
+    <!-- Ficha general -->
+    <div class="card bg-white border border-slate-200 shadow-sm p-6 rounded-2xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Paciente</span>
+                <h2 class="text-lg font-bold text-slate-800">{{ paciente.nombre_completo }}</h2>
+                <p class="text-xs text-slate-500">{{ paciente.email }}</p>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Ficha Antropométrica Base</span>
+                <p class="text-sm font-semibold text-slate-700">Estatura: {{ paciente.estatura_cm }} cm</p>
+                <p class="text-xs text-slate-500">Sexo: {{ paciente.sexo }}</p>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Restricciones / Alergias</span>
+                <p class="text-xs text-rose-600 font-medium">{{ paciente.alergias or 'Ninguna' }}</p>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Meta del Paciente</span>
+                <p class="text-xs text-slate-700 font-medium">{{ paciente.objetivo_salud or 'General' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluaciones Antropométricas Históricas -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6">
+            <h3 class="font-bold text-base text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-emerald-500"></i> Historial de Evaluaciones y Mediciones
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="table w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Fecha</th>
+                            <th>Peso (kg)</th>
+                            <th>IMC</th>
+                            <th>% Grasa</th>
+                            <th>Masa Muscular</th>
+                            <th>Cintura / Cadera</th>
+                            <th>Especialista</th>
+                            <th>Notas Diagnósticas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in consultas %}
+                        <tr class="hover">
+                            <td class="font-bold text-slate-700">{{ c.fecha_evaluacion }}</td>
+                            <td class="font-bold text-emerald-600">{{ c.peso_kg }} kg</td>
+                            <td>
+                                <span class="badge {% if c.imc < 25 %}badge-success text-white{% elif c.imc < 30 %}badge-warning{% else %}badge-error text-white{% endif %} badge-sm">
+                                    {{ c.imc }}
+                                </span>
+                            </td>
+                            <td>{{ c.porcentaje_grasa or '-' }} %</td>
+                            <td>{{ c.masa_muscular_kg or '-' }} kg</td>
+                            <td>{{ c.circunferencia_cintura or '-' }} cm / {{ c.circunferencia_cadera or '-' }} cm</td>
+                            <td class="text-xs">{{ c.nutriologo }}</td>
+                            <td class="text-xs text-slate-500 max-w-xs">{{ c.diagnostico_notas }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-6 text-slate-400">No hay evaluaciones antropométricas registradas para este paciente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planes Históricos -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6">
+            <h3 class="font-bold text-base text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bowl-rice text-amber-500"></i> Planes de Alimentación Prescritos
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for p in planes %}
+                <div class="p-4 rounded-xl border {% if p.activo %}border-emerald-300 bg-emerald-50/30{% else %}border-slate-200 bg-white{% endif %}">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-slate-800 text-sm">{{ p.titulo_plan }}</h4>
+                        {% if p.activo %}
+                            <span class="badge badge-success text-white badge-xs">ACTIVO</span>
+                        {% else %}
+                            <span class="badge badge-ghost badge-xs">Histórico</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-xs text-slate-600 space-y-1">
+                        <p><i class="fa-solid fa-fire text-amber-500 mr-1"></i> Aporte: <strong>{{ p.calorias_totales }} kcal</strong></p>
+                        <p><i class="fa-regular fa-calendar mr-1 text-slate-400"></i> Inicio: {{ p.fecha_inicio }}</p>
+                        <p class="text-slate-400">Prescrito por: {{ p.nutriologo }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="col-span-2 text-center py-4 text-xs text-slate-400">No hay planes prescritos.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

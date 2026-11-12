@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Administrador{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Panel Administrativo</h1>
+            <p class="text-sm text-slate-500">Supervisión integral de especialistas, pacientes y agenda clínica.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('admin_nutriologos') }}" class="btn btn-primary btn-sm text-white shadow-sm">
+                <i class="fa-solid fa-user-plus mr-1"></i> Gestionar Especialistas
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="stat-figure text-emerald-500">
+                <i class="fa-solid fa-hospital-user text-3xl"></i>
+            </div>
+            <div class="stat-title text-xs font-semibold text-slate-400">PACIENTES REGISTRADOS</div>
+            <div class="stat-value text-slate-800">{{ total_pacientes }}</div>
+            <div class="stat-desc text-emerald-600 font-medium"><i class="fa-solid fa-circle-check"></i> En seguimiento activo</div>
+        </div>
+
+        <div class="stat bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="stat-figure text-teal-500">
+                <i class="fa-solid fa-user-doctor text-3xl"></i>
+            </div>
+            <div class="stat-title text-xs font-semibold text-slate-400">NUTRIÓLOGOS ACTIVOS</div>
+            <div class="stat-value text-slate-800">{{ total_nutriologos }}</div>
+            <div class="stat-desc text-slate-500">Especialistas clínicos</div>
+        </div>
+
+        <div class="stat bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="stat-figure text-blue-500">
+                <i class="fa-solid fa-calendar-check text-3xl"></i>
+            </div>
+            <div class="stat-title text-xs font-semibold text-slate-400">TOTAL DE CITAS</div>
+            <div class="stat-value text-slate-800">{{ total_citas }}</div>
+            <div class="stat-desc text-slate-500">Histórico de consultas</div>
+        </div>
+
+        <div class="stat bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="stat-figure text-amber-500">
+                <i class="fa-solid fa-clock text-3xl"></i>
+            </div>
+            <div class="stat-title text-xs font-semibold text-slate-400">CITAS HOY</div>
+            <div class="stat-value text-slate-800">{{ citas_hoy }}</div>
+            <div class="stat-desc text-amber-600 font-medium">Atención del día</div>
+        </div>
+    </div>
+
+    <!-- Tabla Citas Recientes -->
+    <div class="card bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div class="card-body p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="card-title text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-list-check text-emerald-500 mr-2"></i> Actividad Reciente de Citas
+                </h2>
+                <span class="badge badge-outline text-xs">Últimos registros</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th>Fecha & Hora</th>
+                            <th>Paciente</th>
+                            <th>Nutriólogo(a)</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas_recientes %}
+                        <tr>
+                            <td class="font-medium">
+                                <i class="fa-regular fa-calendar mr-1 text-slate-400"></i> {{ cita.fecha_cita }}
+                                <span class="badge badge-ghost badge-sm ml-1">{{ cita.hora_cita }}</span>
+                            </td>
+                            <td class="font-semibold text-slate-700">{{ cita.paciente }}</td>
+                            <td>{{ cita.nutriologo }}</td>
+                            <td class="text-xs text-slate-500">{{ cita.motivo }}</td>
+                            <td>
+                                {% if cita.estado == 'Confirmada' %}
+                                    <span class="badge badge-success text-white badge-sm">Confirmada</span>
+                                {% elif cita.estado == 'Pendiente' %}
+                                    <span class="badge badge-warning badge-sm">Pendiente</span>
+                                {% elif cita.estado == 'Completada' %}
+                                    <span class="badge badge-info text-white badge-sm">Completada</span>
+                                {% else %}
+                                    <span class="badge badge-error text-white badge-sm">Cancelada</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-6 text-slate-400">No hay citas registradas en el sistema.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

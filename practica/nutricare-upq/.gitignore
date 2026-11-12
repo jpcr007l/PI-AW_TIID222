@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.db
+.DS_Store
+screenshots/
+generate_pdf.py
+generate_vscode_screenshots.py
+PROYECTO_NUTRICION_UPQ.pdf

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Mi Portal de Nutrición{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Bienvenida -->
+    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 sm:p-8 rounded-2xl shadow-md">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <span class="badge badge-sm bg-white/20 text-white border-none mb-2">Portal del Paciente</span>
+                <h1 class="text-2xl sm:text-3xl font-bold">¡Hola, {{ session.get('user_name') }}! 🌿</h1>
+                <p class="text-emerald-100 text-sm mt-1">Revisa tu plan nutricional y da seguimiento a tus objetivos de salud.</p>
+            </div>
+            <a href="{{ url_for('paciente_citas') }}" class="btn bg-white text-emerald-800 hover:bg-emerald-50 border-none btn-sm shadow font-semibold">
+                <i class="fa-solid fa-calendar-plus mr-1"></i> Agendar Cita
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Próxima Cita -->
+        <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+            <div class="card-body p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tu Próxima Cita</span>
+                    <i class="fa-solid fa-calendar-check text-emerald-500 text-xl"></i>
+                </div>
+
+                {% if proxima_cita %}
+                    <div class="mt-2 space-y-2">
+                        <div class="text-2xl font-bold text-slate-800">{{ proxima_cita.fecha_cita }}</div>
+                        <p class="text-sm font-semibold text-emerald-600"><i class="fa-regular fa-clock mr-1"></i> {{ proxima_cita.hora_cita }} hrs</p>
+                        <p class="text-xs text-slate-500">Con: <strong>{{ proxima_cita.nutriologo }}</strong> ({{ proxima_cita.especialidad }})</p>
+                        <div class="pt-2">
+                            <span class="badge badge-success text-white badge-sm">{{ proxima_cita.estado }}</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="py-6 text-center text-slate-400">
+                        <i class="fa-regular fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-xs">No tienes citas próximas agendadas.</p>
+                        <a href="{{ url_for('paciente_citas') }}" class="btn btn-xs btn-outline btn-primary mt-3">Agendar Ahora</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Última Medición -->
+        <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+            <div class="card-body p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tu Estado Actual</span>
+                    <i class="fa-solid fa-weight-scale text-teal-500 text-xl"></i>
+                </div>
+
+                {% if ultima_medicion %}
+                    <div class="mt-2 space-y-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold text-slate-800">{{ ultima_medicion.peso_kg }}</span>
+                            <span class="text-sm font-semibold text-slate-400">kg</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500">IMC Registrado:</span>
+                            <span class="badge badge-sm font-bold {% if ultima_medicion.imc < 25 %}badge-success text-white{% elif ultima_medicion.imc < 30 %}badge-warning{% else %}badge-error text-white{% endif %}">
+                                {{ ultima_medicion.imc }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400">Grasa: <strong>{{ ultima_medicion.porcentaje_grasa or '-' }}%</strong> | Músculo: <strong>{{ ultima_medicion.masa_muscular_kg or '-' }}kg</strong></p>
+                        <div class="pt-2">
+                            <a href="{{ url_for('paciente_expediente') }}" class="text-xs text-emerald-600 font-semibold hover:underline">
+                                Ver evolución completa <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="py-6 text-center text-slate-400">
+                        <p class="text-xs">Aún no tienes mediciones antropométricas.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Menú Nutricional Activo -->
+        <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+            <div class="card-body p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Plan de Alimentación</span>
+                    <i class="fa-solid fa-utensils text-amber-500 text-xl"></i>
+                </div>
+
+                {% if plan_activo %}
+                    <div class="mt-2 space-y-2">
+                        <h4 class="font-bold text-slate-800 text-sm line-clamp-1">{{ plan_activo.titulo_plan }}</h4>
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-warning badge-sm font-semibold"><i class="fa-solid fa-fire mr-1"></i> {{ plan_activo.calorias_totales }} kcal / día</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Prescrito por: {{ plan_activo.nutriologo }}</p>
+                        <div class="pt-2">
+                            <a href="{{ url_for('paciente_plan') }}" class="btn btn-sm btn-primary w-full text-white">
+                                <i class="fa-solid fa-bowl-food mr-1"></i> Ver mis comidas
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="py-6 text-center text-slate-400">
+                        <p class="text-xs">Tu nutriólogo te asignará un menú en tu primera consulta.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

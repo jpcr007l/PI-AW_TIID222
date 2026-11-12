@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Consulta Antropométrica - NutriCare{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('medico_pacientes') }}" class="btn btn-ghost btn-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Volver a pacientes
+        </a>
+        <span class="badge badge-primary text-white font-semibold">Registro de Consulta Nutricional</span>
+    </div>
+
+    <!-- Tarjeta del Paciente -->
+    <div class="card bg-white border border-slate-200 shadow-sm p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
+                {{ paciente.nombre_completo[:1] }}
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">{{ paciente.nombre_completo }}</h2>
+                <p class="text-xs text-slate-500">Sexo: {{ paciente.sexo }} | Nacimiento: {{ paciente.fecha_nacimiento }}</p>
+                <p class="text-xs text-slate-600 mt-1"><strong>Objetivo:</strong> {{ paciente.objetivo_salud }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Evaluación -->
+    <div class="card bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div class="card-body p-6 sm:p-8">
+            <h3 class="font-bold text-base text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-tape text-emerald-500"></i> Parámetros Antropométricos (ABCD de Nutrición)
+            </h3>
+
+            <form action="{{ url_for('medico_consulta', id_paciente=paciente.id_paciente) }}" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Fecha de Evaluación</span></label>
+                        <input type="date" name="fecha_evaluacion" id="fecha_eval" class="input input-bordered input-sm w-full" required />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Estatura del Paciente (cm)</span></label>
+                        <input type="number" step="0.5" id="estatura" name="estatura_cm" value="{{ paciente.estatura_cm }}" required class="input input-bordered input-sm w-full" oninput="calcularIMC()" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Peso Actual (kg)</span></label>
+                        <input type="number" step="0.1" id="peso" name="peso_kg" placeholder="Ej. 68.5" required class="input input-bordered input-sm w-full font-bold text-emerald-700" oninput="calcularIMC()" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Índice de Masa Corporal (IMC)</span></label>
+                        <input type="text" id="imc_display" readonly class="input input-bordered input-sm w-full bg-slate-100 font-bold" placeholder="Auto-calculado" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">% Grasa Corporal</span></label>
+                        <input type="number" step="0.1" name="porcentaje_grasa" placeholder="Ej. 24.5" class="input input-bordered input-sm w-full" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Masa Muscular Magra (kg)</span></label>
+                        <input type="number" step="0.1" name="masa_muscular_kg" placeholder="Ej. 28.0" class="input input-bordered input-sm w-full" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Circunferencia Cintura (cm)</span></label>
+                        <input type="number" step="0.5" name="circunferencia_cintura" placeholder="Ej. 78.0" class="input input-bordered input-sm w-full" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium text-xs">Circunferencia Cadera (cm)</span></label>
+                        <input type="number" step="0.5" name="circunferencia_cadera" placeholder="Ej. 99.0" class="input input-bordered input-sm w-full" />
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium text-xs">Diagnóstico Nutricio y Notas Clínicas</span></label>
+                    <textarea name="diagnostico_notas" rows="3" class="textarea textarea-bordered w-full text-sm" placeholder="Observaciones sobre adherencia, sintomatología gastrointestinal y evolución del paciente..."></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="btn btn-primary w-full text-white shadow-md">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Guardar Evaluación Antropométrica
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('fecha_eval').valueAsDate = new Date();
+
+function calcularIMC() {
+    const peso = parseFloat(document.getElementById('peso').value);
+    const estaturaCm = parseFloat(document.getElementById('estatura').value);
+    
+    if (peso > 0 && estaturaCm > 0) {
+        const estMetros = estaturaCm / 100.0;
+        const imc = (peso / (estMetros * estMetros)).toFixed(2);
+        
+        let clasificacion = "";
+        if (imc < 18.5) clasificacion = " (Bajo peso)";
+        else if (imc < 25) clasificacion = " (Normal)";
+        else if (imc < 30) clasificacion = " (Sobrepeso)";
+        else clasificacion = " (Obesidad)";
+
+        document.getElementById('imc_display').value = imc + clasificacion;
+    } else {
+        document.getElementById('imc_display').value = "";
+    }
+}
+</script>
+{% endblock %}
